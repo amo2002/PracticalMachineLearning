@@ -1,0 +1,198 @@
+---
+title: "Practical Machine Learning"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+
+```
+
+## Project Summary
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset).
+
+
+
+## Goal  and objectives of the project
+
+Our goal is to identify how well they do the exercise. So we have to identify when they make the exercise exactly according to the specification (Class A), when they throw the elbows to the front (Class B), when they lift the dumbbell only halfway (Class C), when they lower the dumbbell only halfway (Class D) and when they throw the hips to the front (Class E).
+
+The analysis will build a machine learning model from the sample data that is attempting to most accurately predict the manner in which the exercise was performed. This is a classification problem into discrete categories, which in the training data are located in the 'classe' varaible.We will  we will focus on using the most widely-used, most accurate prediction algorithms: random forests and Generalized Boosted.
+
+
+1.Create a report describing how you built your model, how you used cross validation, what you think the expected out of sample error is, and why you made the choices you did. 
+
+2.You will also use your prediction model to predict 20 different test cases.
+
+## Load librairies and set default directory
+```{r, echo=FALSE}
+
+# setwd("C:/Users/amoum/Documents/Projects/PracticalMachineLearning")
+#install.packages("caret")
+library(caret)
+#install.packages("ggplot2")
+library(ggplot2)
+#install.packages("randomForest")
+library(randomForest)
+#install.packages('e1071', dependencies=TRUE)
+
+```
+## Prepare the datasets
+```{r}
+
+# download files from the urls provided
+
+# download.file(url="http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv", destfile="training.csv")
+
+# download.file(url="http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv", destfile="testing.csv")
+
+# read in training and testing data
+train <- read.csv("training.csv", na.strings=c("NA","#DIV/0!",""))
+test <- read.csv("testing.csv", na.strings=c("NA","#DIV/0!",""))
+
+# Exploraing the data
+names(train)
+str(train)
+
+
+# This is the outcome we want to predict
+
+```
+
+## Data Loading and Cleaning
+To find an optimal model, with the best performance both in Accuracy as well as minimizing Out of Sample Error, the full testing data is split randomly with a set seed with 70% of the data into the training sample and 20% of the data used as cross-validation. When the samples are created, they are sliced by column against the feature set so only the variables of interest are fed into the final model.
+The testing dataset is not changed and will only be used for the quiz results generation.
+
+## Split Training set into training/test set
+
+```{r}
+# Predict the 'classe' variable using any other variable to predict with
+
+inTrain <- createDataPartition(y=train$classe, p=0.70, list=FALSE)
+training <- train[inTrain,]
+testing <- train[-inTrain,]
+
+# Training dataset
+dim(training)
+
+# Testing dataset
+
+dim(testing)
+
+# Some exploratory plots
+# FeaturePlot(x=train[, 150:159], y = train$classe, plot = 'pairs')
+```
+## Cleaning the data
+Both created datasets have 160 variables. Those variables have plenty of NA, that can be removed with cleaning procedures below. The Near Zero variance(NZV) variables are removed and the ID variables as well. The dataset will be reduced to 60 variables.
+```{r}
+# Remove variables with mostly NAs (use threshold of >70%)
+
+myTrainingSet <- training
+
+for (i in 1:length(training)) {
+  if (sum(is.na(training[ , i])) / nrow(training) >= .70) {
+    for (j in 1:length(myTrainingSet)) {
+      if (length(grep(names(training[i]), names(myTrainingSet)[j]))==1) {
+        myTrainingSet <- myTrainingSet[ , -j]
+      }
+    }
+  }
+}
+
+
+dim(myTrainingSet)
+
+
+# names(myTrainingSet)
+```
+There are several columns, the first 7 that do not have any impact on the classification and can therefore be removed. These columns include Row ID, Username, and Time Series, which do not act as predictors the classe based on the workout outputs.
+
+```{r}
+# remove columns that are obviously not predictors
+myTrainSubset <- myTrainingSet[,8:length(myTrainingSet)]
+
+# remove variables  near zero variance
+NZV <- nearZeroVar(myTrainSubset, saveMetrics = TRUE)
+
+
+dim(myTrainSubset)
+
+```
+## Loading required package: parallel and doParallel to increase performance
+
+```{r, echo=FALSE }
+#install.packages("doParallel")
+
+require(parallel)
+
+require(doParallel)
+
+registerDoParallel(makeCluster(detectCores() - 1))
+
+trainControl(classProbs=TRUE, savePredictions=TRUE, allowParallel=TRUE)
+
+```
+## Generalized Boosted Regression Models.
+
+
+```{r}
+
+set.seed(223)
+
+controlGB <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
+modFITGB  <- train(classe ~ ., data=myTrainSubset, method = "gbm",
+                    trControl = controlGB, verbose = FALSE)
+modFITGB$finalModel
+
+# prediction on Test dataset
+predictGB <- predict(modFITGB, newdata=testing)
+confMATGB <- confusionMatrix(predictGB, testing$classe)
+confMATGB
+
+# GBM  Accuracy : 0.9563  
+
+```
+
+## Prediction Model Method: Random Forest
+```{r}
+
+# model- RANDOM FOREST
+
+set.seed(223)
+
+controlRF <- trainControl(method="cv", number=4, verboseIter=FALSE)
+modFITRF <- train(classe ~ ., data=myTrainSubset, method="rf",
+                          trControl=controlRF)
+modFITRF$finalModel
+
+
+# prediction on Test dataset
+predictRF <- predict(modFITRF, newdata=testing)
+confRF <- confusionMatrix(predictRF, testing$classe)
+confRF
+
+
+# Randon Forest Accuracy : 0.9921 
+
+
+```
+
+*As we can see from the model above, when we run the model on our test data for cross validation we get an accuracy of 99.42% using random forest that we can estimate to be our out of sample error.*
+
+## Applying the Selected Model to the Test Data
+
+```{r}
+
+#resultPredict
+
+predict(modFITRF, newdata=test)
+
+
+```
+
+## Conclusion:
+
+**All 20 of the classes were identified correctly.**
+
