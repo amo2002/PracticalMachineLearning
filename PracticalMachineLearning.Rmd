@@ -27,7 +27,7 @@ The analysis will build a machine learning model from the sample data that is at
 2.You will also use your prediction model to predict 20 different test cases.
 
 ## Load librairies and set default directory
-```{r, echo=FALSE}
+```{r}
 
 # setwd("C:/Users/amoum/Documents/Projects/PracticalMachineLearning")
 #install.packages("caret")
@@ -39,7 +39,7 @@ library(randomForest)
 #install.packages('e1071', dependencies=TRUE)
 
 ```
-## Prepare the datasets
+## Prepare and load the datasets
 ```{r}
 
 # download files from the urls provided
@@ -53,7 +53,7 @@ train <- read.csv("training.csv", na.strings=c("NA","#DIV/0!",""))
 test <- read.csv("testing.csv", na.strings=c("NA","#DIV/0!",""))
 
 # Exploraing the data
-names(train)
+
 str(train)
 
 
@@ -68,13 +68,12 @@ The testing dataset is not changed and will only be used for the quiz results ge
 ## Split Training set into training/test set
 
 ```{r}
-# Predict the 'classe' variable using any other variable to predict with
 
 inTrain <- createDataPartition(y=train$classe, p=0.70, list=FALSE)
 training <- train[inTrain,]
 testing <- train[-inTrain,]
 
-# Training dataset
+# Training dataset 
 dim(training)
 
 # Testing dataset
@@ -82,10 +81,14 @@ dim(training)
 dim(testing)
 
 # Some exploratory plots
+
 # FeaturePlot(x=train[, 150:159], y = train$classe, plot = 'pairs')
+
 ```
 ## Cleaning the data
+
 Both created datasets have 160 variables. Those variables have plenty of NA, that can be removed with cleaning procedures below. The Near Zero variance(NZV) variables are removed and the ID variables as well. The dataset will be reduced to 60 variables.
+
 ```{r}
 # Remove variables with mostly NAs (use threshold of >70%)
 
@@ -106,6 +109,7 @@ dim(myTrainingSet)
 
 
 # names(myTrainingSet)
+
 ```
 There are several columns, the first 7 that do not have any impact on the classification and can therefore be removed. These columns include Row ID, Username, and Time Series, which do not act as predictors the classe based on the workout outputs.
 
@@ -122,8 +126,8 @@ dim(myTrainSubset)
 ```
 ## Loading required package: parallel and doParallel to increase performance
 
-```{r, echo=FALSE }
-#install.packages("doParallel")
+```{r, eval=FALSE }
+# install.packages("doParallel")
 
 require(parallel)
 
@@ -147,11 +151,12 @@ modFITGB  <- train(classe ~ ., data=myTrainSubset, method = "gbm",
 modFITGB$finalModel
 
 # prediction on Test dataset
+
 predictGB <- predict(modFITGB, newdata=testing)
 confMATGB <- confusionMatrix(predictGB, testing$classe)
 confMATGB
 
-# GBM  Accuracy : 0.9563  
+# GBM  Accuracy : 0.9602  
 
 ```
 
@@ -174,12 +179,12 @@ confRF <- confusionMatrix(predictRF, testing$classe)
 confRF
 
 
-# Randon Forest Accuracy : 0.9921 
+# Randon Forest Accuracy : 0.9941  
 
 
 ```
 
-*As we can see from the model above, when we run the model on our test data for cross validation we get an accuracy of 99.42% using random forest that we can estimate to be our out of sample error.*
+*As we can see from the model above, when we run the model on our test data for cross validation we get an accuracy of 99.41% using random forest, which is better then the result of using the Generalized Boosted Regression, therefore for predication we will use the random forest result modFITRF dataset*
 
 ## Applying the Selected Model to the Test Data
 

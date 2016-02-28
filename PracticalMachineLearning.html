@@ -125,8 +125,15 @@ $(document).ready(function () {
 </div>
 <div id="load-librairies-and-set-default-directory" class="section level2">
 <h2>Load librairies and set default directory</h2>
+<pre class="r"><code># setwd(&quot;C:/Users/amoum/Documents/Projects/PracticalMachineLearning&quot;)
+#install.packages(&quot;caret&quot;)
+library(caret)</code></pre>
 <pre><code>## Loading required package: lattice</code></pre>
 <pre><code>## Loading required package: ggplot2</code></pre>
+<pre class="r"><code>#install.packages(&quot;ggplot2&quot;)
+library(ggplot2)
+#install.packages(&quot;randomForest&quot;)
+library(randomForest)</code></pre>
 <pre><code>## randomForest 4.6-12</code></pre>
 <pre><code>## Type rfNews() to see new features/changes/bug fixes.</code></pre>
 <pre><code>## 
@@ -134,9 +141,10 @@ $(document).ready(function () {
 <pre><code>## The following object is masked from 'package:ggplot2':
 ## 
 ##     margin</code></pre>
+<pre class="r"><code>#install.packages('e1071', dependencies=TRUE)</code></pre>
 </div>
-<div id="prepare-the-datasets" class="section level2">
-<h2>Prepare the datasets</h2>
+<div id="prepare-and-load-the-datasets" class="section level2">
+<h2>Prepare and load the datasets</h2>
 <pre class="r"><code># download files from the urls provided
 
 # download.file(url=&quot;http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv&quot;, destfile=&quot;training.csv&quot;)
@@ -148,88 +156,8 @@ train &lt;- read.csv(&quot;training.csv&quot;, na.strings=c(&quot;NA&quot;,&quot
 test &lt;- read.csv(&quot;testing.csv&quot;, na.strings=c(&quot;NA&quot;,&quot;#DIV/0!&quot;,&quot;&quot;))
 
 # Exploraing the data
-names(train)</code></pre>
-<pre><code>##   [1] &quot;X&quot;                        &quot;user_name&quot;               
-##   [3] &quot;raw_timestamp_part_1&quot;     &quot;raw_timestamp_part_2&quot;    
-##   [5] &quot;cvtd_timestamp&quot;           &quot;new_window&quot;              
-##   [7] &quot;num_window&quot;               &quot;roll_belt&quot;               
-##   [9] &quot;pitch_belt&quot;               &quot;yaw_belt&quot;                
-##  [11] &quot;total_accel_belt&quot;         &quot;kurtosis_roll_belt&quot;      
-##  [13] &quot;kurtosis_picth_belt&quot;      &quot;kurtosis_yaw_belt&quot;       
-##  [15] &quot;skewness_roll_belt&quot;       &quot;skewness_roll_belt.1&quot;    
-##  [17] &quot;skewness_yaw_belt&quot;        &quot;max_roll_belt&quot;           
-##  [19] &quot;max_picth_belt&quot;           &quot;max_yaw_belt&quot;            
-##  [21] &quot;min_roll_belt&quot;            &quot;min_pitch_belt&quot;          
-##  [23] &quot;min_yaw_belt&quot;             &quot;amplitude_roll_belt&quot;     
-##  [25] &quot;amplitude_pitch_belt&quot;     &quot;amplitude_yaw_belt&quot;      
-##  [27] &quot;var_total_accel_belt&quot;     &quot;avg_roll_belt&quot;           
-##  [29] &quot;stddev_roll_belt&quot;         &quot;var_roll_belt&quot;           
-##  [31] &quot;avg_pitch_belt&quot;           &quot;stddev_pitch_belt&quot;       
-##  [33] &quot;var_pitch_belt&quot;           &quot;avg_yaw_belt&quot;            
-##  [35] &quot;stddev_yaw_belt&quot;          &quot;var_yaw_belt&quot;            
-##  [37] &quot;gyros_belt_x&quot;             &quot;gyros_belt_y&quot;            
-##  [39] &quot;gyros_belt_z&quot;             &quot;accel_belt_x&quot;            
-##  [41] &quot;accel_belt_y&quot;             &quot;accel_belt_z&quot;            
-##  [43] &quot;magnet_belt_x&quot;            &quot;magnet_belt_y&quot;           
-##  [45] &quot;magnet_belt_z&quot;            &quot;roll_arm&quot;                
-##  [47] &quot;pitch_arm&quot;                &quot;yaw_arm&quot;                 
-##  [49] &quot;total_accel_arm&quot;          &quot;var_accel_arm&quot;           
-##  [51] &quot;avg_roll_arm&quot;             &quot;stddev_roll_arm&quot;         
-##  [53] &quot;var_roll_arm&quot;             &quot;avg_pitch_arm&quot;           
-##  [55] &quot;stddev_pitch_arm&quot;         &quot;var_pitch_arm&quot;           
-##  [57] &quot;avg_yaw_arm&quot;              &quot;stddev_yaw_arm&quot;          
-##  [59] &quot;var_yaw_arm&quot;              &quot;gyros_arm_x&quot;             
-##  [61] &quot;gyros_arm_y&quot;              &quot;gyros_arm_z&quot;             
-##  [63] &quot;accel_arm_x&quot;              &quot;accel_arm_y&quot;             
-##  [65] &quot;accel_arm_z&quot;              &quot;magnet_arm_x&quot;            
-##  [67] &quot;magnet_arm_y&quot;             &quot;magnet_arm_z&quot;            
-##  [69] &quot;kurtosis_roll_arm&quot;        &quot;kurtosis_picth_arm&quot;      
-##  [71] &quot;kurtosis_yaw_arm&quot;         &quot;skewness_roll_arm&quot;       
-##  [73] &quot;skewness_pitch_arm&quot;       &quot;skewness_yaw_arm&quot;        
-##  [75] &quot;max_roll_arm&quot;             &quot;max_picth_arm&quot;           
-##  [77] &quot;max_yaw_arm&quot;              &quot;min_roll_arm&quot;            
-##  [79] &quot;min_pitch_arm&quot;            &quot;min_yaw_arm&quot;             
-##  [81] &quot;amplitude_roll_arm&quot;       &quot;amplitude_pitch_arm&quot;     
-##  [83] &quot;amplitude_yaw_arm&quot;        &quot;roll_dumbbell&quot;           
-##  [85] &quot;pitch_dumbbell&quot;           &quot;yaw_dumbbell&quot;            
-##  [87] &quot;kurtosis_roll_dumbbell&quot;   &quot;kurtosis_picth_dumbbell&quot; 
-##  [89] &quot;kurtosis_yaw_dumbbell&quot;    &quot;skewness_roll_dumbbell&quot;  
-##  [91] &quot;skewness_pitch_dumbbell&quot;  &quot;skewness_yaw_dumbbell&quot;   
-##  [93] &quot;max_roll_dumbbell&quot;        &quot;max_picth_dumbbell&quot;      
-##  [95] &quot;max_yaw_dumbbell&quot;         &quot;min_roll_dumbbell&quot;       
-##  [97] &quot;min_pitch_dumbbell&quot;       &quot;min_yaw_dumbbell&quot;        
-##  [99] &quot;amplitude_roll_dumbbell&quot;  &quot;amplitude_pitch_dumbbell&quot;
-## [101] &quot;amplitude_yaw_dumbbell&quot;   &quot;total_accel_dumbbell&quot;    
-## [103] &quot;var_accel_dumbbell&quot;       &quot;avg_roll_dumbbell&quot;       
-## [105] &quot;stddev_roll_dumbbell&quot;     &quot;var_roll_dumbbell&quot;       
-## [107] &quot;avg_pitch_dumbbell&quot;       &quot;stddev_pitch_dumbbell&quot;   
-## [109] &quot;var_pitch_dumbbell&quot;       &quot;avg_yaw_dumbbell&quot;        
-## [111] &quot;stddev_yaw_dumbbell&quot;      &quot;var_yaw_dumbbell&quot;        
-## [113] &quot;gyros_dumbbell_x&quot;         &quot;gyros_dumbbell_y&quot;        
-## [115] &quot;gyros_dumbbell_z&quot;         &quot;accel_dumbbell_x&quot;        
-## [117] &quot;accel_dumbbell_y&quot;         &quot;accel_dumbbell_z&quot;        
-## [119] &quot;magnet_dumbbell_x&quot;        &quot;magnet_dumbbell_y&quot;       
-## [121] &quot;magnet_dumbbell_z&quot;        &quot;roll_forearm&quot;            
-## [123] &quot;pitch_forearm&quot;            &quot;yaw_forearm&quot;             
-## [125] &quot;kurtosis_roll_forearm&quot;    &quot;kurtosis_picth_forearm&quot;  
-## [127] &quot;kurtosis_yaw_forearm&quot;     &quot;skewness_roll_forearm&quot;   
-## [129] &quot;skewness_pitch_forearm&quot;   &quot;skewness_yaw_forearm&quot;    
-## [131] &quot;max_roll_forearm&quot;         &quot;max_picth_forearm&quot;       
-## [133] &quot;max_yaw_forearm&quot;          &quot;min_roll_forearm&quot;        
-## [135] &quot;min_pitch_forearm&quot;        &quot;min_yaw_forearm&quot;         
-## [137] &quot;amplitude_roll_forearm&quot;   &quot;amplitude_pitch_forearm&quot; 
-## [139] &quot;amplitude_yaw_forearm&quot;    &quot;total_accel_forearm&quot;     
-## [141] &quot;var_accel_forearm&quot;        &quot;avg_roll_forearm&quot;        
-## [143] &quot;stddev_roll_forearm&quot;      &quot;var_roll_forearm&quot;        
-## [145] &quot;avg_pitch_forearm&quot;        &quot;stddev_pitch_forearm&quot;    
-## [147] &quot;var_pitch_forearm&quot;        &quot;avg_yaw_forearm&quot;         
-## [149] &quot;stddev_yaw_forearm&quot;       &quot;var_yaw_forearm&quot;         
-## [151] &quot;gyros_forearm_x&quot;          &quot;gyros_forearm_y&quot;         
-## [153] &quot;gyros_forearm_z&quot;          &quot;accel_forearm_x&quot;         
-## [155] &quot;accel_forearm_y&quot;          &quot;accel_forearm_z&quot;         
-## [157] &quot;magnet_forearm_x&quot;         &quot;magnet_forearm_y&quot;        
-## [159] &quot;magnet_forearm_z&quot;         &quot;classe&quot;</code></pre>
-<pre class="r"><code>str(train)</code></pre>
+
+str(train)</code></pre>
 <pre><code>## 'data.frame':    19622 obs. of  160 variables:
 ##  $ X                       : int  1 2 3 4 5 6 7 8 9 10 ...
 ##  $ user_name               : Factor w/ 6 levels &quot;adelmo&quot;,&quot;carlitos&quot;,..: 2 2 2 2 2 2 2 2 2 2 ...
@@ -339,13 +267,11 @@ names(train)</code></pre>
 </div>
 <div id="split-training-set-into-trainingtest-set" class="section level2">
 <h2>Split Training set into training/test set</h2>
-<pre class="r"><code># Predict the 'classe' variable using any other variable to predict with
-
-inTrain &lt;- createDataPartition(y=train$classe, p=0.70, list=FALSE)
+<pre class="r"><code>inTrain &lt;- createDataPartition(y=train$classe, p=0.70, list=FALSE)
 training &lt;- train[inTrain,]
 testing &lt;- train[-inTrain,]
 
-# Training dataset
+# Training dataset 
 dim(training)</code></pre>
 <pre><code>## [1] 13737   160</code></pre>
 <pre class="r"><code># Testing dataset
@@ -353,6 +279,7 @@ dim(training)</code></pre>
 dim(testing)</code></pre>
 <pre><code>## [1] 5885  160</code></pre>
 <pre class="r"><code># Some exploratory plots
+
 # FeaturePlot(x=train[, 150:159], y = train$classe, plot = 'pairs')</code></pre>
 </div>
 <div id="cleaning-the-data" class="section level2">
@@ -389,109 +316,15 @@ dim(myTrainSubset)</code></pre>
 </div>
 <div id="loading-required-package-parallel-and-doparallel-to-increase-performance" class="section level2">
 <h2>Loading required package: parallel and doParallel to increase performance</h2>
-<pre><code>## Loading required package: parallel</code></pre>
-<pre><code>## Loading required package: doParallel</code></pre>
-<pre><code>## Loading required package: foreach</code></pre>
-<pre><code>## Loading required package: iterators</code></pre>
-<pre><code>## $method
-## [1] &quot;boot&quot;
-## 
-## $number
-## [1] 25
-## 
-## $repeats
-## [1] 25
-## 
-## $search
-## [1] &quot;grid&quot;
-## 
-## $p
-## [1] 0.75
-## 
-## $initialWindow
-## NULL
-## 
-## $horizon
-## [1] 1
-## 
-## $fixedWindow
-## [1] TRUE
-## 
-## $verboseIter
-## [1] FALSE
-## 
-## $returnData
-## [1] TRUE
-## 
-## $returnResamp
-## [1] &quot;final&quot;
-## 
-## $savePredictions
-## [1] TRUE
-## 
-## $classProbs
-## [1] TRUE
-## 
-## $summaryFunction
-## function (data, lev = NULL, model = NULL) 
-## {
-##     if (is.character(data$obs)) 
-##         data$obs &lt;- factor(data$obs, levels = lev)
-##     postResample(data[, &quot;pred&quot;], data[, &quot;obs&quot;])
-## }
-## &lt;environment: namespace:caret&gt;
-## 
-## $selectionFunction
-## [1] &quot;best&quot;
-## 
-## $preProcOptions
-## $preProcOptions$thresh
-## [1] 0.95
-## 
-## $preProcOptions$ICAcomp
-## [1] 3
-## 
-## $preProcOptions$k
-## [1] 5
-## 
-## 
-## $sampling
-## NULL
-## 
-## $index
-## NULL
-## 
-## $indexOut
-## NULL
-## 
-## $timingSamps
-## [1] 0
-## 
-## $predictionBounds
-## [1] FALSE FALSE
-## 
-## $seeds
-## [1] NA
-## 
-## $adaptive
-## $adaptive$min
-## [1] 5
-## 
-## $adaptive$alpha
-## [1] 0.05
-## 
-## $adaptive$method
-## [1] &quot;gls&quot;
-## 
-## $adaptive$complete
-## [1] TRUE
-## 
-## 
-## $trim
-## [1] FALSE
-## 
-## $allowParallel
-## [1] TRUE</code></pre>
+<pre class="r"><code># install.packages(&quot;doParallel&quot;)
+
+require(parallel)
+
+require(doParallel)
+
+registerDoParallel(makeCluster(detectCores() - 1))
+
+trainControl(classProbs=TRUE, savePredictions=TRUE, allowParallel=TRUE)</code></pre>
 </div>
 <div id="generalized-boosted-regression-models." class="section level2">
 <h2>Generalized Boosted Regression Models.</h2>
@@ -508,13 +341,15 @@ modFITGB  &lt;- train(classe ~ ., data=myTrainSubset, method = &quot;gbm&quot;,
 ## 
 ##     cluster</code></pre>
 <pre><code>## Loading required package: splines</code></pre>
+<pre><code>## Loading required package: parallel</code></pre>
 <pre><code>## Loaded gbm 2.1.1</code></pre>
 <pre><code>## Loading required package: plyr</code></pre>
 <pre class="r"><code>modFITGB$finalModel</code></pre>
 <pre><code>## A gradient boosted model with multinomial loss function.
 ## 150 iterations were performed.
-## There were 52 predictors of which 41 had non-zero influence.</code></pre>
+## There were 52 predictors of which 42 had non-zero influence.</code></pre>
 <pre class="r"><code># prediction on Test dataset
+
 predictGB &lt;- predict(modFITGB, newdata=testing)
 confMATGB &lt;- confusionMatrix(predictGB, testing$classe)
 confMATGB</code></pre>
@@ -522,34 +357,34 @@ confMATGB</code></pre>
 ## 
 ##           Reference
 ## Prediction    A    B    C    D    E
-##          A 1658   47    0    1    5
-##          B   10 1063   44    6   10
-##          C    4   28  973   41    8
-##          D    1    1    7  910    8
-##          E    1    0    2    6 1051
+##          A 1648   29    0    0    0
+##          B   19 1087   27    4    5
+##          C    2   20  981   29    8
+##          D    4    3   16  923   12
+##          E    1    0    2    8 1057
 ## 
 ## Overall Statistics
 ##                                           
-##                Accuracy : 0.9609          
-##                  95% CI : (0.9556, 0.9657)
+##                Accuracy : 0.9679          
+##                  95% CI : (0.9631, 0.9722)
 ##     No Information Rate : 0.2845          
 ##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
 ##                                           
-##                   Kappa : 0.9505          
-##  Mcnemar's Test P-Value : 3.353e-12       
+##                   Kappa : 0.9594          
+##  Mcnemar's Test P-Value : 0.009284        
 ## 
 ## Statistics by Class:
 ## 
 ##                      Class: A Class: B Class: C Class: D Class: E
-## Sensitivity            0.9904   0.9333   0.9483   0.9440   0.9713
-## Specificity            0.9874   0.9853   0.9833   0.9965   0.9981
-## Pos Pred Value         0.9690   0.9382   0.9231   0.9817   0.9915
-## Neg Pred Value         0.9962   0.9840   0.9890   0.9891   0.9936
+## Sensitivity            0.9845   0.9543   0.9561   0.9575   0.9769
+## Specificity            0.9931   0.9884   0.9879   0.9929   0.9977
+## Pos Pred Value         0.9827   0.9518   0.9433   0.9635   0.9897
+## Neg Pred Value         0.9938   0.9890   0.9907   0.9917   0.9948
 ## Prevalence             0.2845   0.1935   0.1743   0.1638   0.1839
-## Detection Rate         0.2817   0.1806   0.1653   0.1546   0.1786
-## Detection Prevalence   0.2907   0.1925   0.1791   0.1575   0.1801
-## Balanced Accuracy      0.9889   0.9593   0.9658   0.9703   0.9847</code></pre>
-<pre class="r"><code># GBM  Accuracy : 0.9563  </code></pre>
+## Detection Rate         0.2800   0.1847   0.1667   0.1568   0.1796
+## Detection Prevalence   0.2850   0.1941   0.1767   0.1628   0.1815
+## Balanced Accuracy      0.9888   0.9714   0.9720   0.9752   0.9873</code></pre>
+<pre class="r"><code># GBM  Accuracy : 0.9602  </code></pre>
 </div>
 <div id="prediction-model-method-random-forest" class="section level2">
 <h2>Prediction Model Method: Random Forest</h2>
@@ -566,16 +401,16 @@ modFITRF$finalModel</code></pre>
 ##  randomForest(x = x, y = y, mtry = param$mtry) 
 ##                Type of random forest: classification
 ##                      Number of trees: 500
-## No. of variables tried at each split: 2
+## No. of variables tried at each split: 27
 ## 
-##         OOB estimate of  error rate: 0.75%
+##         OOB estimate of  error rate: 0.73%
 ## Confusion matrix:
 ##      A    B    C    D    E class.error
-## A 3901    3    1    0    1 0.001280082
-## B   16 2634    8    0    0 0.009029345
-## C    0   23 2373    0    0 0.009599332
-## D    0    0   43 2207    2 0.019982238
-## E    0    0    1    5 2519 0.002376238</code></pre>
+## A 3900    2    3    0    1 0.001536098
+## B   22 2628    6    2    0 0.011286682
+## C    0   14 2377    5    0 0.007929883
+## D    0    1   27 2221    3 0.013765542
+## E    0    1    6    7 2511 0.005544554</code></pre>
 <pre class="r"><code># prediction on Test dataset
 predictRF &lt;- predict(modFITRF, newdata=testing)
 confRF &lt;- confusionMatrix(predictRF, testing$classe)
@@ -584,35 +419,35 @@ confRF</code></pre>
 ## 
 ##           Reference
 ## Prediction    A    B    C    D    E
-##          A 1673   14    0    0    0
-##          B    0 1122   11    0    0
-##          C    1    3 1014   20    0
-##          D    0    0    1  944    1
-##          E    0    0    0    0 1081
+##          A 1672    6    0    0    0
+##          B    1 1129    2    0    0
+##          C    0    4 1020    6    2
+##          D    0    0    4  957    1
+##          E    1    0    0    1 1079
 ## 
 ## Overall Statistics
 ##                                           
-##                Accuracy : 0.9913          
-##                  95% CI : (0.9886, 0.9935)
+##                Accuracy : 0.9952          
+##                  95% CI : (0.9931, 0.9968)
 ##     No Information Rate : 0.2845          
 ##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
 ##                                           
-##                   Kappa : 0.989           
+##                   Kappa : 0.994           
 ##  Mcnemar's Test P-Value : NA              
 ## 
 ## Statistics by Class:
 ## 
 ##                      Class: A Class: B Class: C Class: D Class: E
-## Sensitivity            0.9994   0.9851   0.9883   0.9793   0.9991
-## Specificity            0.9967   0.9977   0.9951   0.9996   1.0000
-## Pos Pred Value         0.9917   0.9903   0.9769   0.9979   1.0000
-## Neg Pred Value         0.9998   0.9964   0.9975   0.9960   0.9998
+## Sensitivity            0.9988   0.9912   0.9942   0.9927   0.9972
+## Specificity            0.9986   0.9994   0.9975   0.9990   0.9996
+## Pos Pred Value         0.9964   0.9973   0.9884   0.9948   0.9981
+## Neg Pred Value         0.9995   0.9979   0.9988   0.9986   0.9994
 ## Prevalence             0.2845   0.1935   0.1743   0.1638   0.1839
-## Detection Rate         0.2843   0.1907   0.1723   0.1604   0.1837
-## Detection Prevalence   0.2867   0.1925   0.1764   0.1607   0.1837
-## Balanced Accuracy      0.9980   0.9914   0.9917   0.9894   0.9995</code></pre>
-<pre class="r"><code># Randon Forest Accuracy : 0.9921 </code></pre>
-<p><em>As we can see from the model above, when we run the model on our test data for cross validation we get an accuracy of 99.42% using random forest that we can estimate to be our out of sample error.</em></p>
+## Detection Rate         0.2841   0.1918   0.1733   0.1626   0.1833
+## Detection Prevalence   0.2851   0.1924   0.1754   0.1635   0.1837
+## Balanced Accuracy      0.9987   0.9953   0.9958   0.9959   0.9984</code></pre>
+<pre class="r"><code># Randon Forest Accuracy : 0.9941  </code></pre>
+<p><em>As we can see from the model above, when we run the model on our test data for cross validation we get an accuracy of 99.41% using random forest, which is better then the result of using the Generalized Boosted Regression, therefore for predication we will use the random forest result modFITRF dataset</em></p>
 </div>
 <div id="applying-the-selected-model-to-the-test-data" class="section level2">
 <h2>Applying the Selected Model to the Test Data</h2>
